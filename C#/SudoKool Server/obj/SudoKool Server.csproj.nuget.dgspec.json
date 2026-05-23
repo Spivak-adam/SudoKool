@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Spiva\\repos\\SudoKool\\C#\\SudoKool Server\\SudoKool Server.csproj": {}
+    "C:\\Users\\Spiva\\repos\\SudoKool\\c#\\SudoKool Server\\SudoKool Server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Spiva\\repos\\SudoKool\\C#\\SudoKool Server\\SudoKool Server.csproj": {
+    "C:\\Users\\Spiva\\repos\\SudoKool\\c#\\SudoKool Server\\SudoKool Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Spiva\\repos\\SudoKool\\C#\\SudoKool Server\\SudoKool Server.csproj",
+        "projectUniqueName": "C:\\Users\\Spiva\\repos\\SudoKool\\c#\\SudoKool Server\\SudoKool Server.csproj",
         "projectName": "SudoKool Server",
-        "projectPath": "C:\\Users\\Spiva\\repos\\SudoKool\\C#\\SudoKool Server\\SudoKool Server.csproj",
+        "projectPath": "C:\\Users\\Spiva\\repos\\SudoKool\\c#\\SudoKool Server\\SudoKool Server.csproj",
         "packagesPath": "C:\\Users\\Spiva\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Spiva\\repos\\SudoKool\\C#\\SudoKool Server\\obj\\",
+        "outputPath": "C:\\Users\\Spiva\\repos\\SudoKool\\c#\\SudoKool Server\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Spiva\\AppData\\Roaming\\NuGet\\NuGet.Config"
