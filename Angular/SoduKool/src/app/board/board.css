@@ -9,6 +9,22 @@ td {
     text-align: center;
 }
 
+tr:nth-child(1){
+    border-top: 5px solid black;
+}
+
+td:nth-child(1){
+    border-left: 5px solid black;
+}
+
+tr:nth-child(3n){
+    border-bottom: 5px solid black;
+}
+
+td:nth-child(3n){
+    border-right: 5px solid black;
+}
+
 input{
     width: 40px;
     height: 40px;
