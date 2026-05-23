@@ -23,4 +23,11 @@ export class Board {
             () => this.getRandomInt(1,9)
         )
     )*/
+
+  onInputChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+
+  console.log(input.value);
+
+  input.style.backgroundColor = "yellow";}
 }

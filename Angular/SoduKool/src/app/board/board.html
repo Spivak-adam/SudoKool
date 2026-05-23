@@ -1,9 +1,14 @@
 <table>
-  @for (row of board; track $index) {
+    <tbody>
+  @for (row of board; track $index; let rowIndex = $index) {
     <tr>
-      @for (cell of row; track $index) {
-        <td><input type="text" /></td>
+      @for (cell of row; track $index; let colIndex = $index) {
+        <td>
+          <input [id]="'cell-'+ rowIndex +'-'+ colIndex" type="text"
+           (input)="onInputChange($event)" />
+        </td>
       }
     </tr>
   }
+  </tbody>
 </table>
