@@ -5,7 +5,7 @@
       @for (cell of row; track $index; let colIndex = $index) {
         <td>
           <input [id]="'cell-'+ rowIndex +'-'+ colIndex" type="text"
-           (input)="onInputChange($event)" />
+           (input)="onInputChange($event, rowIndex, colIndex)" />
         </td>
       }
     </tr>
