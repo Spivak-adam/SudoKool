@@ -11,10 +11,6 @@ public static class SudokoolService
         Board board = new Board
         {
             GameID = gameID,
-            Quadrant = 0,
-            Row = 0,
-            Column = 0,
-            input = 0,
             DateEnter = DateTime.Now
         };
 
