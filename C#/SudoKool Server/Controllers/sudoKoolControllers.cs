@@ -56,10 +56,9 @@ public class SudokoolController : ControllerBase
     }
 
     [HttpPost("move")]
-    public async Task<ActionResult<Board>> SaveMove(Board board)
-    {
-        var savedBoard = await _service.SaveMove(board);
-
-        return Ok(savedBoard);
-    }
+public async Task<ActionResult<Board>> SaveMove(SaveMoveDto move)
+{
+    var savedMove = await _service.SaveMove(move);
+    return Ok(savedMove);
+}
 }

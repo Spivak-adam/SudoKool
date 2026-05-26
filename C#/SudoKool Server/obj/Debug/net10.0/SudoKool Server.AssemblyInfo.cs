@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SudoKool Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+163d18c880bff6c69edc734e643cf59a68e57ab9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f448fc99e6f8a379a7fde5dbbddc200862d4b83")]
 [assembly: System.Reflection.AssemblyProductAttribute("SudoKool Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SudoKool Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

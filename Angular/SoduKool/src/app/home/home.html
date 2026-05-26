@@ -3,4 +3,10 @@
 <app-board></app-board>
 
 <button (click)="startGame()">Start Game</button>
-<button (click)="loadGame()">Load Game</button>
+<button (click)="openLoadPopup()">Load Game</button>
+
+@for (game of games; track game.id) {
+  <button (click)="loadGame(game.id)">
+    Game {{ game.id }}
+  </button>
+}
