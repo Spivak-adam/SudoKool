@@ -38,11 +38,28 @@ public class SudokoolController : ControllerBase
 
         return Ok(boards);
     }
+
+    [HttpPost("start-game")]
+    public async Task<ActionResult<List<Board>>> StartGame()
+    {
+        var boards = await _service.StartGame();
+
+        return Ok(boards);
+    }
+
     [HttpPost("boards")]
     public async Task<ActionResult<Board>> CreateBoard(int gameId)
     {
         var newBoard = await _service.CreateStartingBoard(gameId);
 
         return Ok(newBoard);
+    }
+
+    [HttpPost("move")]
+    public async Task<ActionResult<Board>> SaveMove(Board board)
+    {
+        var savedBoard = await _service.SaveMove(board);
+
+        return Ok(savedBoard);
     }
 }
