@@ -13,6 +13,22 @@ public class SudokoolService
         _context = context;
     }
 
+    public async Task<List<Board>> StartGame()
+    {
+        Games game = new Games
+        {
+            DateStarted = DateTime.Now
+        };
+
+        _context.Games.Add(game);
+
+        await _context.SaveChangesAsync();
+
+        var boards = await GenerateBoard(game.Id, 7);
+
+        return boards;
+    }
+
     public async Task<List<Games>> GetGame()
     {
         return await _context.Games.ToListAsync();
@@ -42,40 +58,53 @@ public class SudokoolService
     public async Task<List<Board>> GenerateBoard(int gameId, int cellsToGenerate)
     {
         Random rnd = new Random();
-        List<Board> generatedBoards = new List<Board>();
+        List<Board> generatedBoards = new();
 
         int attempts = 0;
 
-        while (generatedBoards.Count < cellsToGenerate && attempts < 500)
+        while (generatedBoards.Count < cellsToGenerate && attempts < 1000)
         {
             attempts++;
 
-            Board board = new Board
-            {
-                GameId = gameId,
-                Quadrant = rnd.Next(0, 9),
-                Row = rnd.Next(0, 9),
-                Column = rnd.Next(0, 9),
-                Input = rnd.Next(1, 10),
-                DateEnter = DateTime.Now
-            };
+            int row = rnd.Next(0, 9);
+            int col = rnd.Next(0, 9);
+            int input = rnd.Next(1, 10);
+            int quad = GetQuadrant(row, col);
 
-            bool moveValid = await CheckMove(
-                board,
-                board.Quadrant,
-                board.Row,
-                board.Column,
-                board.Input
+            bool spotTaken = generatedBoards.Any(b =>
+                b.Row == row && b.Column == col
             );
 
-            bool spotAlreadyUsed = generatedBoards.Any(b =>
-                b.Row == board.Row &&
-                b.Column == board.Column
+            bool duplicateInGenerated = generatedBoards.Any(b =>
+                b.Input == input &&
+                (
+                    b.Row == row ||
+                    b.Column == col ||
+                    b.Quadrant == quad
+                )
             );
 
-            if (moveValid && !spotAlreadyUsed)
+            bool duplicateInDb = await _context.Boards.AnyAsync(b =>
+                b.GameId == gameId &&
+                b.Input == input &&
+                (
+                    b.Row == row ||
+                    b.Column == col ||
+                    b.Quadrant == quad
+                )
+            );
+
+            if (!spotTaken && !duplicateInGenerated && !duplicateInDb)
             {
-                generatedBoards.Add(board);
+                generatedBoards.Add(new Board
+                {
+                    GameId = gameId,
+                    Row = row,
+                    Column = col,
+                    Quadrant = quad,
+                    Input = input,
+                    DateEnter = DateTime.Now
+                });
             }
         }
 
@@ -83,6 +112,11 @@ public class SudokoolService
         await _context.SaveChangesAsync();
 
         return generatedBoards;
+    }
+
+    private int GetQuadrant(int row, int col)
+    {
+        return (row / 3) * 3 + (col / 3);
     }
 
     public async Task<bool> CheckMove(Board board, int quad, int row, int col, int newInput)
@@ -97,7 +131,7 @@ public class SudokoolService
     public async Task<bool> RowValid(Board board, int row, int newInput)
     {
         var rowBoards = await _context.Boards
-            .Where(b => b.Game.Id == board.Game.Id && b.Row == row)
+            .Where(b => b.GameId == board.GameId && b.Row == row)
             .ToListAsync();
 
         return !rowBoards.Any(b => newInput == b.Input);
@@ -106,7 +140,7 @@ public class SudokoolService
     public async Task<bool> ColValid(Board board, int col, int newInput)
     {
         var colBoards = await _context.Boards
-            .Where(b => b.Game.Id == board.Game.Id && b.Column == col)
+            .Where(b => b.GameId == board.GameId && b.Column == col)
             .ToListAsync();
 
         return !colBoards.Any(b => newInput == b.Input);
@@ -115,11 +149,19 @@ public class SudokoolService
     public async Task<bool> QuadValid(Board board, int quad, int newInput)
     {
         var quadBoards = await _context.Boards
-            .Where(b => b.Game.Id == board.Game.Id && b.Quadrant == quad)
+            .Where(b => b.GameId == board.GameId && b.Quadrant == quad)
             .ToListAsync();
 
         return !quadBoards.Any(b => newInput == b.Input);
     }
 
+    public async Task<Board> SaveMove(Board board)
+    {
+        _context.Boards.Add(board);
+
+        await _context.SaveChangesAsync();
+
+        return board;
+    }
 
 }
