@@ -12,3 +12,5 @@ cd '.\C#\SudoKool Server\'
 
 then run
 dotnet run
+
+dotnet ef database update

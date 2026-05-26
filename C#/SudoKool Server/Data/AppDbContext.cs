@@ -10,5 +10,6 @@ public class AppDbContext : DbContext
     {
     }
 
+    public DbSet<Games> Games { get; set; }
     public DbSet<Board> Boards { get; set; }
 }

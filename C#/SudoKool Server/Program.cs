@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sudokool.Data;
+using Sudokool.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+
+builder.Services.AddScoped<SudokoolService>();
 
 var app = builder.Build();
 
