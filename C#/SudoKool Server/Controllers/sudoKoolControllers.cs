@@ -6,20 +6,43 @@ namespace Sudokool.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SudokoolController: ControllerBase
+public class SudokoolController : ControllerBase
 {
-    public SudokoolController()
+    private readonly SudokoolService _service;
+
+    public SudokoolController(SudokoolService service)
     {
-        
+        _service = service;
     }
 
-    [HttpGet("boards/{id}")]
-    public ActionResult <List<Board>> get(int id) {
-        SudokoolService.CreateBoard(id);
-        
-        List<Board> boards = SudokoolService.GetBoards();
+    [HttpGet("games")]
+    public async Task<ActionResult<List<Games>>> GetGame()
+    {
+        var games = await _service.GetGame();
+
+        return Ok(games);
+    }
+
+    [HttpPost("games")]
+    public async Task<ActionResult<Games>> CreateGame(Games game)
+    {
+        var newGame = await _service.CreateGame(game);
+
+        return Ok(newGame);
+    }
+
+    [HttpGet("games/{gameId}/boards")]
+    public async Task<ActionResult<List<Board>>> GetBoards(int gameId)
+    {
+        var boards = await _service.GetBoards(gameId);
 
         return Ok(boards);
-        
+    }
+    [HttpPost("boards")]
+    public async Task<ActionResult<Board>> CreateBoard(int gameId)
+    {
+        var newBoard = await _service.CreateStartingBoard(gameId);
+
+        return Ok(newBoard);
     }
 }
