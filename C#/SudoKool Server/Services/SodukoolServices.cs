@@ -155,13 +155,38 @@ public class SudokoolService
         return !quadBoards.Any(b => newInput == b.Input);
     }
 
-    public async Task<Board> SaveMove(Board board)
+    public async Task<Board> SaveMove(SaveMoveDto move)
+{
+    var existingCell = await _context.Boards.FirstOrDefaultAsync(b =>
+        b.GameId == move.GameId &&
+        b.Row == move.Row &&
+        b.Column == move.Column
+    );
+
+    if (existingCell != null)
     {
-        _context.Boards.Add(board);
-
-        await _context.SaveChangesAsync();
-
-        return board;
+        existingCell.Input = move.Input;
+        existingCell.Quadrant = move.Quadrant;
+        existingCell.DateEnter = move.DateEnter;
     }
+    else
+    {
+        existingCell = new Board
+        {
+            GameId = move.GameId,
+            Row = move.Row,
+            Column = move.Column,
+            Quadrant = move.Quadrant,
+            Input = move.Input,
+            DateEnter = move.DateEnter
+        };
+
+        _context.Boards.Add(existingCell);
+    }
+
+    await _context.SaveChangesAsync();
+
+    return existingCell;
+}
 
 }

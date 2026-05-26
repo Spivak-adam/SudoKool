@@ -16,27 +16,20 @@ export class BoardComponent {
 
   gameId: number | null = null;
 
-  public board: string[][] = Array.from({ length: this.row }, () =>
-    Array(this.col).fill('')
-  );
+  public board: string[][] = Array.from({ length: this.row }, () => Array(this.col).fill(''));
 
   invalidCells = new Set<string>();
 
   startGame() {
     this.api.startGame().subscribe({
       next: (cells: Board[]) => {
-        this.board = Array.from({ length: this.row }, () =>
-          Array(this.col).fill('')
-        );
+        this.board = Array.from({ length: this.row }, () => Array(this.col).fill(''));
 
         this.invalidCells.clear();
+        this.gameId = cells.length > 0 ? cells[0].gameId : null;
 
         cells.forEach((cell) => {
           this.board[cell.row][cell.column] = cell.input.toString();
-
-          if (this.gameId === null) {
-            this.gameId = cell.gameId;
-          }
         });
 
         console.log('Generated board:', this.board);
@@ -48,37 +41,97 @@ export class BoardComponent {
     });
   }
 
-  loadGame() {
-  if (this.gameId === null) {
-    console.error('No game to load.');
-    return;
+  loadGameById(gameId: number) {
+    this.gameId = gameId;
+
+    this.api.getBoards(gameId).subscribe({
+      next: (cells: Board[]) => {
+        this.board = Array.from({ length: this.row }, () => Array(this.col).fill(''));
+
+        this.invalidCells.clear();
+
+        cells.forEach((cell) => {
+          this.board[cell.row][cell.column] = cell.input.toString();
+        });
+
+        console.log('Loaded game:', this.board);
+      },
+      error: (err) => {
+        console.error('Load game failed:', err);
+      },
+    });
   }
 
-  this.api.getBoards(this.gameId).subscribe({
-    next: (cells: Board[]) => {
-      this.board = Array.from({ length: this.row }, () =>
-        Array(this.col).fill('')
-      );
+  onInputChange(event: Event, rowIndex: number, colIndex: number) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = inputElement.value;
 
-      cells.forEach((cell) => {
-        this.board[cell.row][cell.column] =
-          cell.input.toString();
-      });
+    this.invalidCells.clear();
 
-      console.log('Loaded game:', this.board);
-    },
-    error: (err) => {
-      console.error('Load game failed:', err);
-    },
-  });
-}
+    if (value === '') {
+      this.board[rowIndex][colIndex] = '';
+      return;
+    }
 
-  private cellKey(row: number, col: number): string {
-    return `${row}-${col}`;
+    if (!/^[1-9]$/.test(value)) {
+      inputElement.value = '';
+      this.board[rowIndex][colIndex] = '';
+      return;
+    }
+
+    const previousValue = this.board[rowIndex][colIndex];
+
+    this.board[rowIndex][colIndex] = '';
+
+    const duplicateCell = this.findDuplicate(rowIndex, colIndex, value);
+
+    if (duplicateCell) {
+      this.board[rowIndex][colIndex] = value;
+
+      this.invalidCells.add(this.cellKey(rowIndex, colIndex));
+      this.invalidCells.add(duplicateCell);
+
+      return;
+    }
+
+    this.board[rowIndex][colIndex] = value;
+
+    if (this.gameId === null) {
+      console.error('No gameId found. Start a game first.');
+      return;
+    }
+
+    this.saveMove(rowIndex, colIndex, value, previousValue);
   }
 
-  private getQuadrant(row: number, col: number): number {
-    return Math.floor(row / 3) * 3 + Math.floor(col / 3);
+  private saveMove(rowIndex: number, colIndex: number, value: string, previousValue: string) {
+    if (this.gameId === null) {
+      return;
+    }
+
+    const move: Partial<Board> = {
+      gameId: this.gameId,
+      row: rowIndex,
+      column: colIndex,
+      quadrant: this.getQuadrant(rowIndex, colIndex),
+      input: Number(value),
+      dateEnter: new Date().toISOString(),
+    };
+
+    this.api.saveMove(move).subscribe({
+      next: (savedMove) => {
+        console.log('Saved move:', savedMove);
+
+        if (this.isGameComplete()) {
+          alert('You won!');
+        }
+      },
+      error: (err) => {
+        console.error('Save move failed:', err);
+
+        this.board[rowIndex][colIndex] = previousValue;
+      },
+    });
   }
 
   private findDuplicate(row: number, col: number, value: string): string | null {
@@ -102,60 +155,78 @@ export class BoardComponent {
     return null;
   }
 
-  onInputChange(event: Event, rowIndex: number, colIndex: number) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-
-    this.invalidCells.clear();
-
-    if (value === '') {
-      this.board[rowIndex][colIndex] = '';
-      return;
+  private isGameComplete(): boolean {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (this.board[row][col] === '') {
+          return false;
+        }
+      }
     }
 
-    if (!/^[1-9]$/.test(value)) {
-      input.value = '';
-      this.board[rowIndex][colIndex] = '';
-      return;
+    return this.allRowsValid() && this.allColsValid() && this.allQuadsValid();
+  }
+
+  private allRowsValid(): boolean {
+    for (let row = 0; row < 9; row++) {
+      const nums = this.board[row];
+
+      if (!this.hasOneThroughNine(nums)) {
+        return false;
+      }
     }
 
-    this.board[rowIndex][colIndex] = '';
+    return true;
+  }
 
-    const duplicateCell = this.findDuplicate(rowIndex, colIndex, value);
+  private allColsValid(): boolean {
+    for (let col = 0; col < 9; col++) {
+      const nums: string[] = [];
 
-    if (duplicateCell) {
-      this.board[rowIndex][colIndex] = value;
+      for (let row = 0; row < 9; row++) {
+        nums.push(this.board[row][col]);
+      }
 
-      this.invalidCells.add(this.cellKey(rowIndex, colIndex));
-      this.invalidCells.add(duplicateCell);
-
-      return;
+      if (!this.hasOneThroughNine(nums)) {
+        return false;
+      }
     }
 
-    this.board[rowIndex][colIndex] = value;
+    return true;
+  }
 
-    if (this.gameId === null) {
-      console.error('No gameId found. Start a game first.');
-      return;
+  private allQuadsValid(): boolean {
+    for (let startRow = 0; startRow < 9; startRow += 3) {
+      for (let startCol = 0; startCol < 9; startCol += 3) {
+        const nums: string[] = [];
+
+        for (let r = startRow; r < startRow + 3; r++) {
+          for (let c = startCol; c < startCol + 3; c++) {
+            nums.push(this.board[r][c]);
+          }
+        }
+
+        if (!this.hasOneThroughNine(nums)) {
+          return false;
+        }
+      }
     }
 
-    const move: Partial<Board> = {
-      gameId: this.gameId,
-      row: rowIndex,
-      column: colIndex,
-      quadrant: this.getQuadrant(rowIndex, colIndex),
-      input: Number(value),
-      dateEnter: new Date().toISOString(),
-    };
+    return true;
+  }
 
-    this.api.saveMove(move).subscribe({
-      next: (savedMove) => {
-        console.log('Saved move:', savedMove);
-      },
-      error: (err) => {
-        console.error('Save move failed:', err);
-      },
-    });
+  private hasOneThroughNine(nums: string[]): boolean {
+    const required = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    return required.every((num) => nums.includes(num));
+  }
+
+  private cellKey(row: number, col: number): string {
+    return `${row}-${col}`;
+  }
+
+  private getQuadrant(row: number, col: number): number {
+    return Math.floor(row / 3) * 3 + Math.floor(col / 3);
   }
 
   isInvalidCell(row: number, col: number): boolean {

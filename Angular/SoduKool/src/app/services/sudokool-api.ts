@@ -12,8 +12,13 @@ export interface Board {
   dateEnter: string;
 }
 
+export interface Game {
+  id: number;
+  dateStarted: string;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SudokoolApiService {
   private apiUrl = 'http://localhost:5278/api/sudokool';
@@ -25,12 +30,14 @@ export class SudokoolApiService {
   }
 
   saveMove(board: Partial<Board>) {
-  return this.http.post<Board>(`${this.apiUrl}/move`, board);
-}
+    return this.http.post<Board>(`${this.apiUrl}/move`, board);
+  }
 
-getBoards(gameId: number) {
-  return this.http.get<Board[]>(
-    `${this.apiUrl}/games/${gameId}/boards`
-  );
-}
+  getBoards(gameId: number) {
+    return this.http.get<Board[]>(`${this.apiUrl}/games/${gameId}/boards`);
+  }
+
+  getGames() {
+    return this.http.get<Game[]>(`${this.apiUrl}/games`);
+  }
 }
