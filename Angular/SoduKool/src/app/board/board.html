@@ -1,14 +1,20 @@
 <table>
-    <tbody>
-  @for (row of board; track $index; let rowIndex = $index) {
-    <tr>
-      @for (cell of row; track $index; let colIndex = $index) {
-        <td>
-          <input [id]="'cell-'+ rowIndex +'-'+ colIndex" type="text"
-           (input)="onInputChange($event, rowIndex, colIndex)" />
-        </td>
-      }
-    </tr>
-  }
+  <tbody>
+    @for (row of board; track rowIndex; let rowIndex = $index) {
+      <tr>
+        @for (cell of row; track colIndex; let colIndex = $index) {
+          <td>
+            <input
+              [id]="'cell-' + rowIndex + '-' + colIndex"
+              type="text"
+              maxlength="1"
+              [value]="cell"
+              [class.invalid-cell]="isInvalidCell(rowIndex, colIndex)"
+              (input)="onInputChange($event, rowIndex, colIndex)"
+            />
+          </td>
+        }
+      </tr>
+    }
   </tbody>
 </table>
